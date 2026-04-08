@@ -1,0 +1,197 @@
+syntax on
+
+" Automatically change the working directory to the terminal's directory
+" autocmd TermOpen * lcd %:p:h         " Ensures the terminal window uses the same working directory as the file you're editing
+autocmd VimEnter * silent! lcd %:p:h " Sets the current working directory to the file's directory when you open Vim / NeoVim
+" set shell = cmd.exe
+
+" rtp is a shorthand for runtimepath
+set rtp+=C:\Users\angel\AppData\Local\nvim\site\pack\kanagawa\start\kanagawa.nvim
+set rtp+=C:\Users\angel\.vim\plugged\tokyonight.nvim
+set rtp+=C:\Users\angel\.vim\plugged\gruvbox\
+set rtp+=C:\Users\angel\.vim\plugged\catppuccin\
+
+let g:kanagawa_variant = 'dragon'       " Options -> 'wave', 'lotus', 'dragon'
+let g:catppuccin_flavour = 'latte'  " Options -> 'latte', 'frappe', 'mocha', 'macchiato'
+let g:gruvbox_contrast_dark = 'hard'    " Optional
+let g:tokyonight_style = 'night'        " Options -> 'storm', 'night', 'day'
+
+" colorscheme desert
+" colorscheme kanagawa
+colorscheme tokyonight
+" colorscheme gruvbox
+" colorscheme catppuccin
+
+" colorscheme sonokai
+
+" command! Sonokai colorscheme sonokai
+command! Catppuccin colorscheme catppuccin
+command! Gruvbox colorscheme gruvbox
+command! Tokyonight colorscheme tokyonight
+command! Kanagawa colorscheme kanagawa
+
+" General Settings
+set number
+set relativenumber
+set tabstop=4
+set shiftwidth=4
+set autoindent
+set smartindent
+set expandtab
+set nocompatible
+set ruler
+set showcmd
+set incsearch
+set hlsearch
+set clipboard=unnamedplus
+
+" For some WEIRD FCKN reason (2 days) it messes up the terminal
+" set shellslash
+
+set cino+=L0
+filetype plugin indent on
+" To disable 'smartindent' only for Python files
+" autocmd FileType python setlocal nosmartindent
+
+set autoread
+set history=1000
+set ignorecase
+set mousehide
+set noerrorbells
+set noswapfile
+set pastetoggle=
+set smarttab
+set vb t_vb=
+set sw=4
+set iskeyword+=:
+
+" set rtp += C:\Users\angel\vimfiles\plugged
+" $HOME = C:\Users\angel
+
+" As of 01/28/2025 I don't know why ~ works below
+call plug#begin('~/.vim/plugged')
+
+" Plugins
+Plug 'preservim/nerdtree'                        " File explorer
+Plug 'dense-analysis/ale'                        " Linting and error-checking
+Plug 'neoclide/coc.nvim', {'branch': 'release'}  " Auto completion
+Plug 'nvim-treesitter/nvim-treesitter'           " Syntax highlighting
+Plug 'nvim-lualine/lualine.nvim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'tpope/vim-fugitive'
+Plug 'jiangmiao/auto-pairs'
+
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
+
+" IDK why but it does not work
+"Plug 'sirver/ultisnips'
+"let g:UltiSnipsExpandTrigger = '<tab>'
+"let g:UltiSnipsJumpForwardTrigger = '<tab>'
+"let g:UltiSnipsJumpBackwardTrigger = '<s-tab>'
+
+Plug 'honza/vim-snippets'
+Plug 'octol/vim-cpp-enhanced-highlight'
+Plug 'vim-airline/vim-airline'
+" Plug 'glepnir/dashboard-nvim'
+
+Plug 'rebelot/kanagawa.nvim'
+Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+Plug 'morhetz/gruvbox'
+Plug 'folke/tokyonight.nvim'
+
+" the plugin below has a github problem
+Plug 'vim-syntax/sonokai'
+
+call plug#end()
+
+" There was an ANNOYING issue due to conflicts
+let g:AutoPairsMapCR = 0
+
+" Use <Tab> to navigate to the next suggestion
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+
+" Use <Shift-Tab> to navigate to the previous suggestion
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+" Use <Enter> to confirm suggestion
+inoremap <expr> <CR> pumvisible() ? coc#_select_confirm() : (AutoPairsReturn() == "" ? "\<CR>" : AutoPairsReturn())
+
+let g:dashboard_default_executive = 'fzf'
+let g:dashboard_custom_header=['HOPE']
+let g:dashboard_custom_footer=['Keep pushing boundaries!']
+
+let mapleader = "\<Space>"
+noremap <Leader>ev :e C:\Users\angel\AppData\Local\nvim\init.vim <CR>
+noremap <Leader>sv :source C:\Users\angel\AppData\Local\nvim\init.vim <CR>
+
+noremap <Leader>b ^
+noremap <Leader>e <ESC>:e .<CR>
+noremap <Leader>r <C-R>
+noremap <Leader>j <C-W><C-J>
+noremap <Leader>u i_<ESC>r
+noremap <Leader>n :vs
+noremap <Leader>q :q<CR>
+noremap <Leader>o <C-O>
+noremap <Leader>i <C-I>
+noremap <Leader>a ggVG
+noremap <Leader>/ 0i//<ESC>
+
+autocmd FileType cpp setlocal makeprg = g\+\+\ %\ \-g\ \-std\=c\+\+20\ \-Wall
+autocmd FileType haskell setlocal makeprg = ghci\ %
+autocmd FileType python setlocal makeprg = python3\ %
+autocmd FileType sh setlocal makeprg = %
+
+" noremap <Tab> %
+noremap <F1> <ESC>:tabprev <CR>
+vnoremap <F1> <ESC>:tabprev <CR>
+inoremap <F1> <ESC>
+
+" Open a colorscheme picker using F2
+nnoremap <F2> :Switch<CR>
+
+noremap <F3> <ESC> :w <CR> :make <CR>
+inoremap <F3> <ESC> :w <CR> :make <CR>
+
+noremap <F7> <ESC> :w !python3 <CR>
+
+noremap <F8> <ESC> :w <CR> :!g++ -fsanitize=address -std=c++20 -DONPC -O2 -o %< % && ./%< < inp<CR>
+inoremap <F8> <ESC> :w <CR> :!g++ -fsanitize=address -std=c++20 -DONPC -O2 -o "%<" "%" && "./%<" < inp<CR>
+
+noremap <F9> <ESC> :w <CR> :!g++ -fsanitize=address -std=c++20 -Wall -Wextra -Wshadow -DONPC -O2 -o %< % && ./%< <CR>
+inoremap <F9> <ESC> :w <CR> :!g++ -fsanitize=address -std=c++20 -Wall -Wextra -Wshadow -DONPC -O2 -o %< % && ./%< <CR>
+
+noremap <F10> <ESC> :w <CR> :!g++ -fsanitize=address -std=c++20 -Wall -Wextra -Wshadow -DONPC -O2 -o %< % && ./%< < inp<CR>
+inoremap <F10> <ESC> :w <CR> :!g++ -fsanitize=address -std=c++20 -Wall -Wextra -Wshadow -DONPC -O2 -o "%<" "%" && "./%<" < inp<CR>
+
+noremap <TAB> %
+inoremap jk <ESC>
+set timeoutlen=200
+
+let g:loaded_perl_provider=0
+let g:loaded_ruby_provider=0
+" Set a keybinding to complete and run C++ programs
+nnoremap <F5> :w<CR>:!g++ % -o %:r && ./%:r<CR>
+
+" Toggle file explorer
+nnoremap <C-n> :NERDTreeToggle<CR>
+
+if has('win32') || has('win64')
+  let &shell        = 'C:\Program Files\Git\usr\bin\bash.exe'
+  let &shellcmdflag = '-c'
+  let &shellquote   = ''
+  let &shellxquote  = ''
+endif
+
+" normal/insert
+"<Plug>MarkdownPreview
+"<Plug>MarkdownPreviewStop
+"<Plug>MarkdownPreviewToggle
+
+" example
+"nmap <C-s> <Plug>MarkdownPreview
+"nmap <M-s> <Plug>MarkdownPreviewStop
+"nmap <C-p> <Plug>MarkdownPreviewToggle
+
+" autocmd VimEnter * set number relativenumber
+" autocmd BufWinEnter,BufEnter * set number relativenumber
