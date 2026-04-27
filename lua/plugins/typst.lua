@@ -10,7 +10,7 @@ return {
     opts = {
       -- If you did NOT add tinymist to PATH, hardcode the path:
       dependencies_bin = {
-        ['tinymist'] = "C:\\Users\\angel\\AppData\\Local\\typst_nv\\tinymist.exe"
+        ['tinymist'] = os.getenv("LOCALAPPDATA") .. "\\typst_nv\\tinymist.exe"
       },
       port = 5523, -- fixed port avoids weird firewall auto-blocks
     }, -- runs :TypstPreviewUpdate on setup and wires commands

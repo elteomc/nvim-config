@@ -1,6 +1,7 @@
 return {
-  { 
-    'nvim-treesitter/nvim-treesitter', build = ':TSUpdate',
+  {
+    'nvim-treesitter/nvim-treesitter',
+    build = ':TSUpdate',
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       require('nvim-treesitter.configs').setup({
@@ -8,10 +9,13 @@ return {
           enable = true,
           disable = function(_, buf) return vim.api.nvim_buf_line_count(buf) > 5000 end,
         },
-        ensure_installed = { 'lua', 'vim', 'vimdoc', 'cpp', 'python', 'julia', 'haskell', 'markdown' },
+        ensure_installed = { 'lua', 'vim', 'vimdoc', 'cpp', 'python', 'julia', 'haskell', 'markdown', 'markdown_inline' },
       })
     end
   },
-  { 'windwp/nvim-autopairs', event = 'InsertEnter',
-    config = function() require('nvim-autopairs').setup({}) end },
+  {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    config = function() require('nvim-autopairs').setup({}) end
+  },
 }

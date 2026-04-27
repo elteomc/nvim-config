@@ -4,7 +4,8 @@ pcall(function() vim.loader.enable() end)
 o.termguicolors = true
 o.encoding = 'utf-8'
 wo.number, wo.relativenumber = true, true
-o.tabstop, o.shiftwidth, o.expandtab = 4, 4, true
+o.tabstop, o.shiftwidth, o.expandtab = 2, 2, true
+o.softtabstop = 2
 o.smartindent, o.autoindent = true, true
 o.ruler, o.showcmd, o.incsearch, o.hlsearch = true, true, true, true
 o.clipboard, o.ignorecase, o.smartcase = 'unnamedplus', true, true

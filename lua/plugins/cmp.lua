@@ -29,8 +29,8 @@ return {
 
       cmp.setup({
         matching = {
-            disallow_case_insensitive_matching = true,
-            disallow_partial_matching = true,
+          disallow_case_insensitive_matching = true,
+          disallow_partial_matching = true,
         },
 
         snippet = {
@@ -74,9 +74,9 @@ return {
           end, { "i", "s" }),
 
           ["<CR>"] = cmp.mapping(function(fallback)
-            if vim.fn["coc#pum#visible"]() == 1 then
-              vim.api.nvim_feedkeys(vim.fn["coc#pum#confirm"](), "n", true)
-            elseif vim.fn.pumvisible() == 1 then
+            -- if vim.fn["coc#pum#visible"]() == 1 then
+            --   vim.api.nvim_feedkeys(vim.fn["coc#pum#confirm"](), "n", true)
+            if vim.fn.pumvisible() == 1 then
               vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-y>", true, true, true), "n", true)
             elseif cmp.visible() then
               cmp.confirm({ select = true })
@@ -88,10 +88,11 @@ return {
         }),
 
         sources = cmp.config.sources({
+          { name = "otter" },
           { name = "luasnip" },
           { name = "nvim_lsp" },
           { name = "path" },
-          -- { name = "buffer" },
+          { name = "buffer" },
         }),
       })
 
