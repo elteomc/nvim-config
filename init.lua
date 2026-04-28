@@ -1,7 +1,13 @@
 if vim.loader then vim.loader.enable() end
 
+pcall(require, "angelo.local")
+
 -- vim.g.loaded_python3_provider         = 0
-vim.g.python3_host_prog               = "C:\\Users\\angel\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+if not vim.g.python3_host_prog or vim.g.python3_host_prog == "" then
+  if vim.fn.has("win32") == 1 then
+    vim.g.python3_host_prog = "C:\\Users\\angel\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+  end
+end
 vim.g.loaded_ruby_provider            = 0
 vim.g.loaded_perl_provider            = 0
 vim.g.loaded_node_provider            = 0
@@ -11,20 +17,9 @@ vim.g.mapleader, vim.g.maplocalleader = ' ', ' '
 -- no background color for the main background of neovim
 vim.cmd("highlight Normal guibg=NONE")
 
-require('angelo.settings')
-require('angelo.keymaps')
-
-if vim.fn.has("win32") == 1 then
-  if vim.fn.executable("pwsh") == 1 then
-    vim.opt.shell = "pwsh"
-    vim.opt.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
-  elseif vim.fn.executable("powershell") == 1 then
-    vim.opt.shell = "powershell"
-    vim.opt.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
-  end
-  vim.opt.shellquote = ""
-  vim.opt.shellxquote = ""
-end
+require("angelo.settings")
+require("angelo.keymaps")
+require("angelo.cursor").setup()
 
 -- vim.api.nvim_create_autocmd({"VimEnter", "FocusGained", "BufWinEnter"}, {
 --   callback = function()

@@ -84,6 +84,13 @@ return {
     },
     keys = {
       { "<leader>to", "<cmd>ToggleTerm<cr>", desc = "Terminal toggle" },
+      {
+        "<leader>ca",
+        function()
+          require("angelo.cursor").toggle_agent()
+        end,
+        desc = "Cursor Agent",
+      },
     },
   },
   {

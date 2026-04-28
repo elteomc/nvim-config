@@ -1,6 +1,28 @@
 local o, wo = vim.o, vim.wo
 pcall(function() vim.loader.enable() end)
 
+local A = vim.g.angelo or {}
+
+-- Shell: optional overrides from lua/angelo/local.lua (WSL/Linux vs Windows).
+if A.shell and type(A.shell) == "string" then
+  vim.opt.shell = A.shell
+  if A.shellcmdflag then vim.opt.shellcmdflag = A.shellcmdflag end
+  if A.shellquote ~= nil then vim.opt.shellquote = A.shellquote end
+  if A.shellxquote ~= nil then vim.opt.shellxquote = A.shellxquote end
+elseif vim.fn.has("win32") == 1 then
+  if vim.fn.executable("pwsh") == 1 then
+    vim.opt.shell = "pwsh"
+    vim.opt.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
+  elseif vim.fn.executable("powershell") == 1 then
+    vim.opt.shell = "powershell"
+    vim.opt.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
+  end
+  vim.opt.shellquote = ""
+  vim.opt.shellxquote = ""
+elseif vim.fn.has("unix") == 1 then
+  vim.opt.shell = "bash"
+end
+
 o.termguicolors = true
 o.encoding = 'utf-8'
 wo.number, wo.relativenumber = true, true
@@ -11,12 +33,6 @@ o.ruler, o.showcmd, o.incsearch, o.hlsearch = true, true, true, true
 o.clipboard, o.ignorecase, o.smartcase = 'unnamedplus', true, true
 o.autoread, o.history, o.errorbells, o.belloff, o.swapfile = true, 1000, false, 'all', false
 vim.opt.cino:append('L0'); vim.opt.iskeyword:append(':')
-
--- Use Git Bash on Windows (matches your old config)
-if vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1 then
-  o.shell        = [[C:\Program Files\Git\usr\bin\bash.exe]]
-  o.shellcmdflag = '-c'; o.shellquote = ''; o.shellxquote = ''
-end
 
 -- cd to current file’s folder on startup
 vim.api.nvim_create_autocmd('VimEnter', { callback = function()
