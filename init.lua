@@ -6,6 +6,8 @@ pcall(require, "angelo.local")
 if not vim.g.python3_host_prog or vim.g.python3_host_prog == "" then
   if vim.fn.has("win32") == 1 then
     vim.g.python3_host_prog = "C:\\Users\\angel\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+  elseif vim.fn.has("unix") == 1 then
+    vim.g.python3_host_prog = "/usr/bin/python3"
   end
 end
 vim.g.loaded_ruby_provider            = 0

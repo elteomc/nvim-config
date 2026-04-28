@@ -7,13 +7,17 @@ return {
     "chomosuke/typst-preview.nvim",
     ft = "typst",
     version = "1.*",
-    opts = {
-      -- If you did NOT add tinymist to PATH, hardcode the path:
-      dependencies_bin = {
-        ['tinymist'] = os.getenv("LOCALAPPDATA") .. "\\typst_nv\\tinymist.exe"
-      },
-      port = 5523, -- fixed port avoids weird firewall auto-blocks
-    }, -- runs :TypstPreviewUpdate on setup and wires commands
+    opts = function()
+      local deps = {}
+      local la = os.getenv("LOCALAPPDATA")
+      if la and la ~= "" then
+        deps["tinymist"] = la .. "\\typst_nv\\tinymist.exe"
+      end
+      return {
+        dependencies_bin = deps,
+        port = 5523,
+      }
+    end,
   },
 
   -- LSP: Tinymist (diagnostics, hover, completion, formatter)
