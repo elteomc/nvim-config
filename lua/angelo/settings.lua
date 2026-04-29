@@ -61,6 +61,7 @@ vim.api.nvim_create_user_command('Switch', function()
            name:match('^solarized') or
            name:match('^kanagawa') or
            name:match('^catppuccin') or
+           name == 'cyberdream' or
            name == 'gruvbox'
   end, all)
 

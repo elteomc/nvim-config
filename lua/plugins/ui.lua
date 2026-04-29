@@ -40,6 +40,18 @@ return {
     end
   },
   {
+    "scottmckendry/cyberdream.nvim",
+    lazy = false,
+    priority = 99,
+    config = function()
+      require("cyberdream").setup({
+        transparent = true,
+        terminal_colors = true,
+      })
+      -- Default colorscheme stays solarized-osaka (above). Use :Switch or :colorscheme cyberdream.
+    end,
+  },
+  {
     'nyoom-engineering/oxocarbon.nvim',
     -- lazy = true,
     event = "VeryLazy",
