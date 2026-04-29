@@ -8,6 +8,9 @@
 return {
   {
     "stevearc/oil.nvim",
+    -- Eager-load so "-" / :Oil don't wait on first lazy.nvim fetch + require (~0.5–1s cold).
+    lazy = false,
+    priority = 70,
     cmd = { "Oil" },
     opts = {
       float = {
