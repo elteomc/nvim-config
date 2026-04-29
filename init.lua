@@ -99,9 +99,26 @@ vim.api.nvim_create_autocmd("FileType", {
 --   vim.opt.shellslash = false
 -- end
 
+-- Cross-terminal timing helper (also scripts/timer.sh + scripts/timer.ps1).
 vim.api.nvim_create_user_command("Time", function(opts)
+  local cmd = opts.args
   local start = vim.loop.hrtime()
-  vim.fn.system(opts.args)
+  vim.fn.system(cmd)
   local elapsed = (vim.loop.hrtime() - start) / 1e9
-  print(string.format("Took %.3fs", elapsed))
-end, { nargs = "+" })
+  local code = vim.v.shell_error
+  local msg = string.format("Took %.3fs (exit %d)", elapsed, code)
+  print(msg)
+
+  local log = vim.fs.normalize(vim.fn.expand("~/timings.log"))
+  local f = io.open(log, "a")
+  if f then
+    f:write(string.format(
+      "%s | %s | %.3fs | exit=%d\n",
+      os.date("%Y-%m-%d %H:%M:%S"),
+      cmd,
+      elapsed,
+      code
+    ))
+    f:close()
+  end
+end, { nargs = "+", complete = "shellcmd" })

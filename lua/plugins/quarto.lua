@@ -35,13 +35,12 @@ return {
       vim.keymap.set("n", "<Leader>ra", runner.run_all, { desc = "Quarto: run all cells" })
       vim.keymap.set("n", "<Leader>rm", ":MoltenInit<CR>", { desc = "Molten init" })
 
-      -- activate otter when opening a quarto file
-      -- vim.api.nvim_create_autocmd("FileType", {
-      --   pattern = "quarto",
-      --   callback = function()
-      --     require("otter").activate(langs, true, true)
-      --   end,
-      -- })
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "quarto",
+        callback = function()
+          require("otter").activate(langs)
+        end,
+      })
     end,
   },
   {
@@ -52,9 +51,13 @@ return {
     "iamcco/markdown-preview.nvim",
     ft = { "markdown", "quarto" },
     build = "cd app && npm install",
-    -- build = "mkdp#util#install()",
-    -- init = function()
-    --   vim.g.mkdp_filetypes = { "markdown", "quarto" }
-    -- end,
+    init = function()
+      vim.g.mkdp_filetypes = { "markdown", "quarto" }
+      vim.g.mkdp_preview_options = {
+        disable_filename = 0,
+        sync_scroll_type = "middle",
+        math = { enable = true },
+      }
+    end,
   },
 }
