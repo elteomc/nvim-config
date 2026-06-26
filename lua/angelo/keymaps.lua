@@ -2,10 +2,12 @@ local map = vim.keymap.set
 
 -- Edit/reload config
 map('n', '<Leader>ev', function()
+  local config_dir = vim.fn.stdpath("config")
   local config_path = vim.fn.fnamemodify(
-    vim.fn.stdpath("config") .. "/init.lua",
+    config_dir .. "/init.lua",
     ":p"
   )
+  vim.cmd.tcd(config_dir)
   vim.cmd.edit(config_path)
   -- vim.cmd("edit " .. vim.fn.fnameescape(config))
 end, { silent = true })
@@ -16,6 +18,23 @@ end, { silent = true })
 vim.opt.timeoutlen = 150
 map('n', '<Leader>cd', ':cd %:p:h')
 map('n', '<Leader>sd', ':tcd %:p:h') -- avoiding `set autochdir` in init.lua
+-- map('n', '\\', function()
+--   vim.fn.setreg('+', vim.fn.expand('%:p'))
+--   vim.notify('Copied: ' .. vim.fn.expand('%:p'))
+-- end, { silent = true, desc = 'Copy full file path' })
+map('n', '\\', function()
+  local path
+
+  if vim.bo.filetype == "oil" then
+    path = require("oil").get_current_dir()
+  else
+    path = vim.fn.expand('%:p')
+  end
+
+  path = vim.fn.fnamemodify(path, ':p')
+  vim.fn.setreg('+', path)
+  vim.notify('Copied: ' .. path)
+end, { silent = true, desc = 'Copy full file path' })
 
 map('n', '<Leader>b', '^')
 map('n', '<Leader>e', ':e .<CR>', { silent = true })
@@ -71,28 +90,37 @@ map('n', '<Leader>l', ':Lazy<Return>', { silent = true })
 vim.keymap.set('n', '<F2>', ':Switch<CR>', { silent = true })
 vim.keymap.set('n', '<leader>f', '<Plug>(coc-format)')
 
--- Julia REPL via toggleterm
-vim.keymap.set("n", "<leader>jr", function()
-  local Terminal = require("toggleterm.terminal").Terminal
-  local julia = Terminal:new({
-    cmd = "C:/Users/angel/.julia/juliaup/julia-1.12.5+0.x64.w64.mingw32/bin/julia.exe",
-    direction = "vertical",
-    size = 300,
-  })
-  julia:toggle()
-end, { desc = "Toggle Julia REPL" })
+vim.api.nvim_create_autocmd("User", {
+  pattern = "VeryLazy",
+  once = true,
+  
+  callback = function()
+    local Terminal = require("toggleterm.terminal").Terminal
+    
+    local julia = Terminal:new({
+      cmd = "C:/Users/angel/.julia/juliaup/julia-1.12.5+0.x64.w64.mingw32/bin/julia.exe",
+      direction = "vertical",
+      size = 300,
+    })
+    
+    -- Julia REPL via toggleterm
+    vim.keymap.set("n", "<leader>jr", function()
+      julia:toggle()
+    end, { desc = "Toggle Julia REPL" })
 
--- Send current line to REPL
-vim.keymap.set("n", "<leader>jl", function()
-  local line = vim.api.nvim_get_current_line()
-  julia:send(line)
-end, { desc = "Send line to Julia" })
+    -- Send current line to REPL
+    vim.keymap.set("n", "<leader>jl", function()
+      local line = vim.api.nvim_get_current_line()
+      julia:send(line)
+    end, { desc = "Send line to Julia" })
 
--- Send visual selection to REPL
-vim.keymap.set("v", "<leader>js", function()
-  local lines = vim.fn.getline("'<", "'>")
-  julia:send(table.concat(lines, "\n"))
-end, { desc = "Send selection to Julia" })
+    -- Send visual selection to REPL
+    vim.keymap.set("v", "<leader>js", function()
+      local lines = vim.fn.getline("'<", "'>")
+      julia:send(table.concat(lines, "\n"))
+    end, { desc = "Send selection to Julia" })
+  end,
+})
 
 
 

@@ -13,6 +13,8 @@ return {
     priority = 70,
     cmd = { "Oil" },
     opts = {
+      skip_confirm_for_simple_edits = true,
+      prompt_save_on_select_new_entry = false,
       float = {
         padding = 2,
         max_width = 90,
