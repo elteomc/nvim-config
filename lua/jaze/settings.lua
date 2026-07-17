@@ -3,9 +3,9 @@ pcall(function()
   vim.loader.enable()
 end)
 
-local A = vim.g.angelo or {}
+local A = vim.g.jaze or {}
 
--- Shell: optional overrides from lua/angelo/local.lua (WSL/Linux vs Windows).
+-- Shell: optional overrides from lua/jaze/local.lua (WSL/Linux vs Windows).
 if A.shell and type(A.shell) == "string" then
   vim.opt.shell = A.shell
   if A.shellcmdflag then
@@ -137,4 +137,45 @@ vim.api.nvim_create_user_command("Switch", function()
       pcall(vim.cmd.colorscheme, choice)
     end)
   end)
+end, {})
+
+vim.api.nvim_create_user_command("Z", function(opts)
+  local result = vim.system({ "zoxide", "query", opts.args }, { text = true }):wait()
+
+  if result.code ~= 0 then
+    vim.notify("zoxide: no match for " .. opts.args, vim.log.levels.ERROR)
+    return
+  end
+
+  local dir = vim.trim(result.stdout)
+
+  if dir == "" then
+    vim.notify("zoxide: empty result", vim.log.levels.ERROR)
+    return
+  end
+
+  vim.cmd.cd(vim.fn.fnameescape(dir))
+  vim.cmd("Oil")
+end, {
+nargs = "+",
+})
+
+-- Tabbing (only works whenever there are no tab characters outside of indentation)
+-- For simple paragraphs, gg=G or =ap should be enough
+vim.api.nvim_create_user_command("Retab2", function()
+  vim.cmd([[
+    set ts=4 sts=4 noet
+    retab!
+    set ts=2 sts=2 et
+    retab
+  ]])
+end, {})
+
+vim.api.nvim_create_user_command("Retab4", function()
+  vim.cmd([[
+    set ts=2 sts=2 noet
+    retab!
+    set ts=4 sts=4 et
+    retab
+  ]])
 end, {})

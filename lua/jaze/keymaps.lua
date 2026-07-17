@@ -58,8 +58,12 @@ map('i', 'jk', '<ESC>')
 -- New tab
 map('n', 'te', ':tabedit')
 
+map('n', '<leader>r2', '<cmd>Retab2<CR>', { desc = "Retab to 2 spaces" })
+map('n', '<leader>r4', '<cmd>Retab4<CR>', { desc = "Retab to 4 spaces" })
+
 map('n', '<Leader>wv', ':vsplit<Return>')
 map('n', '<Leader>ws', ':split<Return>')
+
 -- Move windows
 map('n', '<Leader>wh', '<C-w>h')
 map('n', '<Leader>wk', '<C-w>k')
@@ -124,7 +128,7 @@ vim.api.nvim_create_autocmd("User", {
 
 
 
--- ── tx CLI integration ────────────────────────────────
+-- tx CLI integration
 -- Press <Esc> or q to close after nvim re-opens the chosen file
 
 local function tx(cmd)
@@ -181,14 +185,7 @@ local function tx(cmd)
   end, { buffer = buf, nowait = true })
 end
 
--- What business do you actually mean: Tool company for funds, a hedge fund, or a hybrid??
--- What exactly is the advantage/wedge? Which exact problem are we attacking first that a 3-10 person team with AI can do better than a larger firm?
--- What is the first milestone? What would we need to prove in 90 days to know this is worth continuing?
--- What parts stay human?
--- Who are you?
-
--- ── keymaps (all under <leader>x — "teXout") ────────────────────────────────
---
+-- keymaps (all under <leader>x - "teXout")
 --   <leader>xn  ->  tx new      create HW / lecture / note (fzf-guided)
 --   <leader>xo  ->  tx open     fuzzy-open any .typ file
 --   <leader>xr  ->  tx recent   50 most recently edited files
@@ -207,7 +204,7 @@ vim.keymap.set("n", "<leader>xs", function() tx("search") end, { desc = "tx: sea
 vim.keymap.set("n", "<leader>xd", function() tx("daily") end, { desc = "tx: daily journal" })
 
 -- Bonus: quick Typst compile + open PDF for current file
--- <leader>xc  →  compile current .typ and open PDF in default viewer
+-- <leader>xc  ->  compile current .typ and open PDF in default viewer
 vim.keymap.set("n", "<leader>xc", function()
   local file        = vim.fn.expand("%:p")
   local dir         = vim.fn.expand("%:p:h")
@@ -224,17 +221,17 @@ vim.keymap.set("n", "<leader>xc", function()
   vim.fn.jobstart(compile_cmd, {
     on_exit = function(_, code, _)
       if code == 0 then
-        vim.notify("✓ " .. stem .. ".pdf", vim.log.levels.INFO)
+        vim.notify("Yes, " .. stem .. ".pdf", vim.log.levels.INFO)
         -- Open PDF in default viewer
         vim.fn.jobstart(string.format('powershell.exe -Command "Start-Process \'%s\'"', pdf))
       else
-        vim.notify("✗ Typst compile failed", vim.log.levels.ERROR)
+        vim.notify("Nope, Typst compile failed", vim.log.levels.ERROR)
       end
     end,
   })
 end, { desc = "tx: compile current file" })
 
--- <leader>xw  →  toggle typst watch for current file
+-- <leader>xw  ->  toggle typst watch for current file
 local _watch_job = nil
 vim.keymap.set("n", "<leader>xw", function()
   if _watch_job then

@@ -1,6 +1,6 @@
 if vim.loader then vim.loader.enable() end
 
-pcall(require, "angelo.local")
+pcall(require, "jaze.local")
 
 -- vim.g.loaded_python3_provider         = 0
 if not vim.g.python3_host_prog or vim.g.python3_host_prog == "" then
@@ -19,9 +19,9 @@ vim.g.mapleader, vim.g.maplocalleader = ' ', ' '
 -- no background color for the main background of neovim
 vim.cmd("highlight Normal guibg=NONE")
 
-require("angelo.settings")
-require("angelo.keymaps")
-require("angelo.cursor").setup()
+require("jaze.settings")
+require("jaze.keymaps")
+require("jaze.cursor").setup()
 
 -- vim.api.nvim_create_autocmd({"VimEnter", "FocusGained", "BufWinEnter"}, {
 --   callback = function()

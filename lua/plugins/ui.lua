@@ -1,5 +1,6 @@
 return {
-  -- colors (optional themes lazy-loaded; :Switch ensures plugins via lua/angelo/settings.lua)
+  -- colors (optional themes lazy-loaded)
+  -- :Switch ensures plugins via lua/jaze/settings.lua)
   {
     "folke/tokyonight.nvim",
     lazy = true,
@@ -87,7 +88,7 @@ return {
       {
         "<leader>ca",
         function()
-          require("angelo.cursor").toggle_agent()
+          require("jaze.cursor").toggle_agent()
         end,
         desc = "Cursor Agent",
       },

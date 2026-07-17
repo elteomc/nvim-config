@@ -24,7 +24,7 @@ local function require_toggleterm()
 end
 
 function M.agent_executable()
-  local a = vim.g.angelo or {}
+  local a = vim.g.jaze or {}
   return type(a.cursor_agent) == "string" and #a.cursor_agent > 0 and a.cursor_agent or "cursor-agent"
 end
 

@@ -10,7 +10,7 @@ return {
     lazy = false,
     priority = 50,
     config = function()
-      require("angelo.lsp").setup()
+      require("jaze.lsp").setup()
     end,
   },
 }

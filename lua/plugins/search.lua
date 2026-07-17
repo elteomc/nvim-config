@@ -36,10 +36,50 @@ return {
     keys = {
       { "<leader>ff", "<cmd>FzfLua files<cr>", desc = "Find files" },
       { "<leader>fG", "<cmd>FzfLua git_files<cr>", desc = "Git files" },
-      { "<leader>fg", "<cmd>FzfLua live_grep<cr>", desc = "Grep" },
+      -- { "<leader>fg", "<cmd>FzfLua live_grep<cr>", desc = "Grep" },
+      {
+        "<leader>fg",
+        function()
+          require("fzf-lua").live_grep({
+            cwd = vim.bo.filetype == "oil"
+              and require("oil").get_current_dir()
+              or vim.fn.getcwd(),
+          })
+        end,
+        desc = "Grep",
+      },
+      -- grep including hidden files
+      {
+        "<leader>fh",
+        function()
+          require("fzf-lua").live_grep({
+            rg_opts = table.concat({
+              "--column",
+              "--line-number",
+              "--no-heading",
+              "--color=always",
+              "--smart-case",
+              "--hidden",
+              "--glob=!**/.git/*",
+            }, " "),
+          })
+        end,
+        desc = "Grep (hidden files)",
+      },
+      {
+        "<leader>fH",
+        function()
+          local config = require("fzf-lua.config")
+          require("fzf-lua").live_grep({
+            rg_opts = config.defaults.grep.rg_opts
+              .. "--hidden --glob=!**/.git/*",
+          })
+        end,
+        desc = "Grep (improved hidden)",
+      },
       { "<leader>fb", "<cmd>FzfLua buffers<cr>", desc = "Buffers" },
       { "<leader>fr", "<cmd>FzfLua oldfiles<cr>", desc = "Recent files" },
-      { "<leader>fh", "<cmd>FzfLua help_tags<cr>", desc = "Help tags" },
+      { "<leader>ft", "<cmd>FzfLua help_tags<cr>", desc = "Help tags" },
       { "<leader>fd", "<cmd>FzfLua diagnostics_document<cr>", desc = "Diagnostics (buffer)" },
       { "<leader>fD", "<cmd>FzfLua diagnostics_workspace<cr>", desc = "Diagnostics (workspace)" },
       -- Check with Telescope keymaps
