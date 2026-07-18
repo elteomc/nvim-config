@@ -11,17 +11,11 @@ map('n', '<Leader>ev', function()
   vim.cmd.edit(config_path)
   -- vim.cmd("edit " .. vim.fn.fnameescape(config))
 end, { silent = true })
--- map('n', '<Leader>ev', ':e $LOCALAPPDATA/nvim/init.lua<CR>', { silent = true })
--- map('n', '<Leader>sv', ':luafile $LOCALAPPDATA/nvim/init.lua<CR>', { silent = true })
 
 -- HABITS PRESERVED
 vim.opt.timeoutlen = 150
 map('n', '<Leader>cd', ':cd %:p:h')
 map('n', '<Leader>sd', ':tcd %:p:h') -- avoiding `set autochdir` in init.lua
--- map('n', '\\', function()
---   vim.fn.setreg('+', vim.fn.expand('%:p'))
---   vim.notify('Copied: ' .. vim.fn.expand('%:p'))
--- end, { silent = true, desc = 'Copy full file path' })
 map('n', '\\', function()
   local path
 
@@ -92,7 +86,14 @@ map('n', '<C-n>', ':NERDTreeToggle<CR>', { silent = true })
 map('n', '<Leader>l', ':Lazy<Return>', { silent = true })
 
 vim.keymap.set('n', '<F2>', ':Switch<CR>', { silent = true })
-vim.keymap.set('n', '<leader>f', '<Plug>(coc-format)')
+
+vim.keymap.set({'n', 'v'}, '<leader>f', function()
+  vim.lsp.buf.format({ async = true })
+end, {
+  desc = "Format buffer or selection",
+})
+
+
 
 vim.api.nvim_create_autocmd("User", {
   pattern = "VeryLazy",

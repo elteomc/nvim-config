@@ -38,7 +38,7 @@ map("n", "<leader>tm", function()
   })
 end, { desc = "Tinymist: Pin main" })
 
--- Let native LSP (tinymist) own diagnostics; avoid duplicates from coc.nvim
+-- Let tinymist own Typst diagnostics
 vim.b.coc_enabled = 0
 
 -- Format on save for this buffer only

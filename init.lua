@@ -40,46 +40,57 @@ vim.opt.rtp:prepend(lazypath)
 -- Load plugins from lua/plugins/*.lua
 require('lazy').setup('plugins', { ui = { border = 'rounded' } })
 
--- C++ integrated CoC
-local map = function(lhs, rhs) vim.api.nvim_set_keymap('n', lhs, rhs, { silent = true, noremap = false }) end
-map('gd', '<Plug>(coc-definition)')
-map('gy', '<Plug>(coc-type-definition)')
-map('gi', '<Plug>(coc-implementation)')
-map('gr', '<Plug>(coc-references)')
-vim.api.nvim_set_keymap('n', 'K', ':call CocActionAsync("doHover")<CR>', { silent = true, noremap = true })
-map('<leader>rn', '<Plug>(coc-rename)')
-map('<leader>qf', '<Plug>(coc-fix-current)')
-map('<leader>ac', '<Plug>(coc-codeaction)')
-map('[g', '<Plug>(coc-diagnostic-prev)')
-map(']g', '<Plug>(coc-diagnostic-next)')
-
-vim.g.coc_start_at_startup = 0 -- coc does not start automatically on launch
-
--- vim.api.nvim_set_keymap('n', '<leader>sh', ':CocCommand clangd.switchSourceHeader<CR>', {silent=true, noremap=true})
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "lua", "bash", "json", "haskell", "vim", "markdown", "c", "cpp", "objc", "objcpp", "python" },
-  callback = function()
-    vim.cmd("silent! CocStart")
-    vim.keymap.set('n', '<leader>sh', ':CocCommand clangd.switchSourceHeader<CR>', {
-      buffer = true,
-      silent = true,
-      noremap = true
-    })
-  end,
+-- Native LSP
+vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {
+  desc = "Go to definition",
 })
 
--- vim.keymap.set("i", "<CR>", function()
---   if vim.fn["coc#pum#visible"]() == 1 then
---     return vim.fn["coc#pum#confirm"]()
---   end
---
---   local cmp = package.loaded["cmp"]
---   if cmp and cmp.visible() then
---     return cmp.confirm({ select = true })
---   end
---
---   return "\r"
--- end, { expr = true, silent = true })
+vim.keymap.set('n', 'gy', vim.lsp.buf.type_definition, {
+  desc = "Go to type definition",
+})
+
+vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, {
+  desc = "Go to implementation",
+})
+
+vim.keymap.set('n', 'gr', vim.lsp.buf.references, {
+  desc = "List references",
+})
+
+vim.keymap.set('n', 'K', vim.lsp.buf.hover, {
+  desc = "Show hover documentation",
+})
+
+vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, {
+  desc = "Rename symbol",
+})
+
+vim.keymap.set({'n', 'v'}, '<leader>ac', vim.lsp.buf.code_action, {
+  desc = "LSP code action",
+})
+
+vim.keymap.set('n', '[g', function()
+  vim.diagnostic.jump({ count = -1, float = true })
+end, {
+  desc = "Previous diagnostic",
+})
+
+vim.keymap.set('n', ']g', function()
+  vim.diagnostic.jump({ count = 1, float = true })
+end, {
+  desc = "Next diagnostic",
+})
+
+vim.keymap.set('n', '<leader>qf', function()
+  vim.lsp.buf.code_action({
+    filter = function(action)
+      return action.isPreferred
+    end,
+    apply = true,
+  })
+end, {
+  desc = "Apply preferred quick fix",
+})
 
 -- Catches typos and works inline while writing
 vim.api.nvim_create_autocmd("FileType", {
@@ -89,15 +100,65 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- if vim.fn.has('win32') == 1 then
---   vim.opt.shell = 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe' -- or 'pwsh.exe' if you have it
---   vim.opt.shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy Bypass -Command'
---   vim.opt.shellquote = ''
---   vim.opt.shellxquote = ''
---   vim.opt.shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
---   vim.opt.shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
---   vim.opt.shellslash = false
--- end
+local function switch_source_header()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local clients = vim.lsp.get_clients({
+    bufnr = bufnr,
+    name = "clangd",
+  })
+
+  local client = clients[1]
+
+  if not client then
+    vim.notify(
+      "clangd is not attached to this buffer",
+      vim.log.levels.WARN
+    )
+    return
+  end
+
+  local params = {
+    uri = vim.uri_from_bufnr(bufnr),
+  }
+
+  client:request(
+    "textDocument/switchSourceHeader",
+    params,
+    function(err, result)
+      if err then
+        vim.notify(
+          "clangd source/header switch failed: " .. err.message,
+          vim.log.levels.ERROR
+        )
+        return
+      end
+
+      if not result or result == "" then
+        vim.notify(
+          "No corresponding source/header file found",
+          vim.log.levels.INFO
+        )
+        return
+      end
+
+      vim.schedule(function()
+        vim.cmd.edit(vim.uri_to_fname(result))
+      end)
+    end,
+    bufnr
+  )
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "c", "cpp", "objc", "objcpp" },
+  callback = function(event)
+    vim.keymap.set('n', '<leader>sh', switch_source_header, {
+      buffer = event.buf,
+      silent = true,
+      desc = "Switch source/header",
+    })
+  end,
+})
 
 -- Cross-terminal timing helper (also scripts/timer.sh + scripts/timer.ps1).
 vim.api.nvim_create_user_command("Time", function(opts)
