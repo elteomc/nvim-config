@@ -1,33 +1,70 @@
+local transparent_groups = {
+  "Normal",
+  "NormalNC",
+  "NormalFloat",
+  "SignColumn",
+  "EndOfBuffer",
+}
+
+local function apply_transparency()
+  for _, group in ipairs(transparent_groups) do
+    vim.api.nvim_set_hl(0, group, {
+      bg = "NONE",
+    })
+  end
+end
+
+local transparency_group = vim.api.nvim_create_augroup(
+  "JazeTransparentBackground",
+  { clear = true }
+)
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = transparency_group,
+  callback = apply_transparency,
+})
+
 return {
-  -- colors (optional themes lazy-loaded)
-  -- :Switch ensures plugins via lua/jaze/settings.lua)
+  -- :Switch ensures plugins via lua/jaze/settings.lua
   {
     "folke/tokyonight.nvim",
     lazy = true,
     priority = 99,
+    opts = {
+      transparent = true,
+      styles = {
+        sidebars = "transparent",
+        floats = "transparent",
+      },
+    },
   },
   {
     "rebelot/kanagawa.nvim",
     lazy = true,
     priority = 97,
-    init = function()
-      vim.g.kanagawa_variant = "dragon"
-    end,
+    opts = {
+      transparent = true,
+      theme = "dragon",
+    },
   },
   {
     "catppuccin/nvim",
     name = "catppuccin",
     lazy = true,
     priority = 96,
-    init = function()
-      vim.g.catppuccin_flavour = "macchiato"
-    end,
+    opts = {
+      flavour = "macchiato",
+      transparent_background = true,
+      float = {
+        transparent = true,
+      },
+    },
   },
   { "morhetz/gruvbox", lazy = true },
   {
     "craftzdog/solarized-osaka.nvim",
     lazy = false,
-    priority = 100,
+    priority = 1000,
     opts = {
       transparent = true,
       styles = {
@@ -38,35 +75,22 @@ return {
     config = function(_, opts)
       require("solarized-osaka").setup(opts)
       vim.cmd.colorscheme("solarized-osaka")
+      apply_transparency()
     end,
   },
   {
     "scottmckendry/cyberdream.nvim",
     lazy = true,
-    priority = 99,
-    config = function()
-      require("cyberdream").setup({
-        transparent = true,
-        terminal_colors = true,
-      })
-    end,
+    -- priority = 99,
+    opts = {
+      transparent = true,
+      terminal_colors = true,
+    },
   },
   {
     "nyoom-engineering/oxocarbon.nvim",
     lazy = true,
-    priority = 98,
-    config = function()
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "oxocarbon",
-        callback = function()
-          vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
-          vim.api.nvim_set_hl(0, "NormalNC", { bg = "NONE" })
-          vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
-          vim.api.nvim_set_hl(0, "SignColumn", { bg = "NONE" })
-          vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "NONE" })
-        end,
-      })
-    end,
+    -- priority = 98,
   },
   {
     "nvim-lualine/lualine.nvim",
