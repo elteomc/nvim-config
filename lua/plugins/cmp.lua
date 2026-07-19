@@ -74,8 +74,6 @@ return {
           end, { "i", "s" }),
 
           ["<CR>"] = cmp.mapping(function(fallback)
-            -- if vim.fn["coc#pum#visible"]() == 1 then
-            --   vim.api.nvim_feedkeys(vim.fn["coc#pum#confirm"](), "n", true)
             if vim.fn.pumvisible() == 1 then
               vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-y>", true, true, true), "n", true)
             elseif cmp.visible() then

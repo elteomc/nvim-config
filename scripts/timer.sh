@@ -14,6 +14,7 @@ timer() {
   start=$(date +%s)
   "$@" &
   pid=$!
+  disown "$pid" 2>/dev/null || true
 
   while kill -0 "$pid" 2>/dev/null; do
     now=$(date +%s)
@@ -22,12 +23,16 @@ timer() {
     mins=$(((elapsed % 3600) / 60))
     secs=$((elapsed % 60))
     r=$((i++ % 4))
+
     if [ "$hours" -gt 0 ]; then
-      printf "\r[%s] %02d:%02d:%02d" "${spin:r:1}" "$hours" "$mins" "$secs"
+      printf "\r[%s] %02d:%02d:%02d" \
+        "${spin:r:1}" "$hours" "$mins" "$secs"
     else
-      printf "\r[%s] %02d:%02d" "${spin:r:1}" "$mins" "$secs"
+      printf "\r[%s] %02d:%02d" \
+        "${spin:r:1}" "$mins" "$secs"
     fi
-    sleep 2
+
+    sleep 1
   done
 
   wait "$pid"

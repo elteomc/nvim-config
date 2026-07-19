@@ -160,7 +160,7 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Cross-terminal timing helper (also scripts/timer.sh + scripts/timer.ps1).
+-- Shell helper for timing long-running commands: scripts/timer.sh
 vim.api.nvim_create_user_command("Time", function(opts)
   local cmd = opts.args
   local start = vim.loop.hrtime()

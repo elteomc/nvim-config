@@ -6,18 +6,18 @@ local capabilities = ok_cmp and cmp_lsp.default_capabilities() or {}
 
 -- Start/enable tinymist for Typst buffers using the new API
 vim.lsp.config("tinymist", {
-  cmd = { "C:\\Users\\angel\\AppData\\Local\\typst_nv\\tinymist.exe" }, -- or full path
+  cmd = { "tinymist" },
   filetypes = { "typst" },
   capabilities = capabilities,
   settings = {
     exportPdf     = "onType",
     outputPath    = "$root/target/$dir/$name",
     formatterMode = "typstyle",
-    compilerPath  =
-    "C:\\Users\\angel\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Typst.Typst_Microsoft.Winget.Source_8wekyb3d8bbwe\\typst-x86_64-pc-windows-msvc\\typst.exe",
+    compilerPath  = vim.fn.exepath("typst"),
   },
 })
-vim.lsp.enable({ "tinymist" })
+
+vim.lsp.enable("tinymist")
 
 -- Buffer-local keymaps (only in .typ buffers)
 local function map(mode, lhs, rhs, opts)
@@ -37,9 +37,6 @@ map("n", "<leader>tm", function()
     arguments = { uri },
   })
 end, { desc = "Tinymist: Pin main" })
-
--- Let tinymist own Typst diagnostics
-vim.b.coc_enabled = 0
 
 -- Format on save for this buffer only
 local grp = vim.api.nvim_create_augroup("TypstFormatOnSave", { clear = false })
@@ -66,7 +63,7 @@ if ok_cmp2 then
     mapping = cmp.mapping.preset.insert({
       ["<CR>"] = cmp.mapping.confirm({ select = true }),
       ["<C-Space>"] = cmp.mapping.complete(),
-      ["<Tab>"] = cmp.mapping(function(callback)
+      ["<Tab>"] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
         elseif require("luasnip").expand_or_jumpable() then
@@ -76,7 +73,7 @@ if ok_cmp2 then
         end
       end, { "i", "s" }),
 
-      ["<S-Tab>"] = cmp.mapping(function(callback)
+      ["<S-Tab>"] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
         elseif require("luasnip").jumpable(-1) then

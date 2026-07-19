@@ -103,7 +103,7 @@ vim.api.nvim_create_autocmd("User", {
     local Terminal = require("toggleterm.terminal").Terminal
     
     local julia = Terminal:new({
-      cmd = "C:/Users/angel/.julia/juliaup/julia-1.12.5+0.x64.w64.mingw32/bin/julia.exe",
+      cmd = vim.fn.exepath("julia"),
       direction = "vertical",
       size = 300,
     })
@@ -133,12 +133,12 @@ vim.api.nvim_create_autocmd("User", {
 -- Press <Esc> or q to close after nvim re-opens the chosen file
 
 local function tx(cmd)
-  -- Build the PowerShell command
-  local ps_cmd = string.format(
-    'powershell.exe -NoProfile -Command "& \'%s\\TeXMeOut\\tools\\tx.ps1\' %s"',
-    os.getenv("USERPROFILE"):gsub("\\", "\\\\"),
-    cmd
-  )
+  if vim.fn.executable("tx") ~= 1 then
+    vim.notify("tx executable not found in PATH", vim.log.levels.ERROR)
+    return
+  end
+
+  local tx_cmd = { "tx", cmd }
 
   -- Floating window dimensions
   local width  = math.floor(vim.o.columns * 0.85)
@@ -163,12 +163,12 @@ local function tx(cmd)
   })
 
   -- Run terminal inside it
-  vim.fn.termopen(ps_cmd, {
-    on_exit = function(_, exit_code, _)
-      -- Close the floating window when the command finishes
+  vim.fn.termopen(tx_cmd, {
+    on_exit = function()
       if vim.api.nvim_win_is_valid(win) then
         vim.api.nvim_win_close(win, true)
       end
+
       if vim.api.nvim_buf_is_valid(buf) then
         vim.api.nvim_buf_delete(buf, { force = true })
       end
@@ -207,54 +207,106 @@ vim.keymap.set("n", "<leader>xd", function() tx("daily") end, { desc = "tx: dail
 -- Bonus: quick Typst compile + open PDF for current file
 -- <leader>xc  ->  compile current .typ and open PDF in default viewer
 vim.keymap.set("n", "<leader>xc", function()
+  if vim.bo.filetype ~= "typst" then
+    vim.notify("Current buffer is not a Typst file", vim.log.levels.WARN)
+    return
+  end
+
   local file        = vim.fn.expand("%:p")
   local dir         = vim.fn.expand("%:p:h")
   local stem        = vim.fn.expand("%:t:r")
-  local pdf         = dir .. "\\target\\" .. stem .. ".pdf"
+  local target_dir  = dir .. "/target"
+  local pdf         = target_dir .. "/" .. stem .. ".pdf"
 
-  local compile_cmd = string.format(
-    'powershell.exe -NoProfile -Command "typst compile \'%s\' \'%s\'"',
-    file, pdf
-  )
+  vim.fn.mkdir(target_dir, "p")
 
-  vim.notify("Compiling " .. stem .. ".typ …", vim.log.levels.INFO)
+  vim.notify("Compiling " .. stem .. ".typ...", vim.log.levels.INFO)
 
-  vim.fn.jobstart(compile_cmd, {
-    on_exit = function(_, code, _)
-      if code == 0 then
-        vim.notify("Yes, " .. stem .. ".pdf", vim.log.levels.INFO)
-        -- Open PDF in default viewer
-        vim.fn.jobstart(string.format('powershell.exe -Command "Start-Process \'%s\'"', pdf))
-      else
-        vim.notify("Nope, Typst compile failed", vim.log.levels.ERROR)
-      end
+  vim.fn.jobstart({
+    "typst",
+    "compile",
+    file,
+    pdf,
+  }, {
+    on_exit = function(_, code)
+      vim.schedule(function()
+        if code == 0 then
+          vim.notify("Compiled " .. stem .. ".pdf", vim.log.levels.INFO)
+
+          vim.fn.jobstart({
+            "zathura",
+            pdf,
+          }, {
+            detach = true,
+          })
+        else
+          vim.notify("Typst compilation failed", vim.log.levels.ERROR)
+        end
+      end)
     end,
   })
-end, { desc = "tx: compile current file" })
+end, { desc = "Typst: compile and open PDF" })
 
 -- <leader>xw  ->  toggle typst watch for current file
 local _watch_job = nil
+
 vim.keymap.set("n", "<leader>xw", function()
   if _watch_job then
     vim.fn.jobstop(_watch_job)
     _watch_job = nil
     vim.notify("Typst watch stopped", vim.log.levels.INFO)
-  else
-    local file = vim.fn.expand("%:p")
-    local root = os.getenv("USERPROFILE") .. "\\TeXMeOut"
-    local cmd  = string.format(
-      'powershell.exe -NoProfile -Command "typst watch \'%s\' --root \'%s\'"',
-      file, root
-    )
-    _watch_job = vim.fn.jobstart(cmd, {
-      on_stderr = function(_, data, _)
-        if data and #data > 0 and data[1] ~= "" then
-          vim.schedule(function()
-            vim.notify(table.concat(data, "\n"), vim.log.levels.WARN)
-          end)
-        end
-      end,
-    })
-    vim.notify("Typst watch started → " .. vim.fn.expand("%:t"), vim.log.levels.INFO)
+    return
   end
-end, { desc = "tx: toggle typst watch" })
+
+  if vim.bo.filetype ~= "typst" then
+    vim.notify("Current buffer is not a Typst file", vim.log.levels.WARN)
+    return
+  end
+
+  local file = vim.fn.expand("%:p")
+  local root = vim.fn.expand("~/angelo/notes")
+
+  _watch_job = vim.fn.jobstart({
+    "typst",
+    "watch",
+    file,
+    "--root",
+    root,
+  }, {
+    on_stderr = function(_, data)
+      if not data then
+        return
+      end
+
+      local messages = vim.tbl_filter(function(line)
+        return line ~= ""
+      end, data)
+
+      if #messages > 0 then
+        vim.schedule(function()
+          vim.notify(
+            table.concat(messages, "\n"),
+            vim.log.levels.WARN
+          )
+        end)
+      end
+    end,
+
+    on_exit = function()
+      _watch_job = nil
+    end,
+  })
+
+  if _watch_job <= 0 then
+    _watch_job = nil
+    vim.notify("Failed to start Typst watch", vim.log.levels.ERROR)
+    return
+  end
+
+  vim.notify(
+    "Typst watch started: " .. vim.fn.expand("%:t"),
+    vim.log.levels.INFO
+  )
+end, {
+  desc = "Typst: toggle watch",
+})

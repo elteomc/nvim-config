@@ -3,11 +3,6 @@ return {
     "lervag/vimtex",
     ft = { "tex", "plaintex", "bib" },
     init = function()
-      -- Use SumatraPDF for viewing (best Windows integration)
-      -- vim.g.vimtex_view_method = "sumatrapdf"
-      -- If not on PATH, set the absolute path:
-      -- vim.g.vimtex_view_sumatrapdf_exe = [[C:\Program Files\SumatraPDF\SumatraPDF.exe]]
-
       vim.g.vimtex_view_method = 'general'
       vim.g.vimtex_view_general_viewer = 'SumatraPDF'
       vim.g.vimtex_view_general_options = '-reuse-instance -forward-search @tex @line @pdf'
