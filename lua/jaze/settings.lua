@@ -1,9 +1,20 @@
 local o, wo = vim.o, vim.wo
-pcall(function()
-  vim.loader.enable()
-end)
 
 local A = vim.g.jaze or {}
+
+-- Providers
+if not vim.g.python3_host_prog
+    or vim.g.python3_host_prog == "" then
+  local python = vim.fn.exepath("python3")
+
+  if python ~= "" then
+    vim.g.python3_host_prog = python
+  end
+end
+
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_node_provider = 0
 
 -- Shell: optional overrides from lua/jaze/local.lua (WSL/Linux vs Windows).
 if A.shell and type(A.shell) == "string" then

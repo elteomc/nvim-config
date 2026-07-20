@@ -1,157 +1,190 @@
--- vim.g.loaded_python3_provider         = 0
-if not vim.g.python3_host_prog or vim.g.python3_host_prog == "" then
-  if vim.fn.has("win32") == 1 then
-    vim.g.python3_host_prog = "C:\\Users\\angel\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
-  elseif vim.fn.has("unix") == 1 then
-    vim.g.python3_host_prog = "/usr/bin/python3"
-  end
-end
-vim.g.loaded_ruby_provider            = 0
-vim.g.loaded_perl_provider            = 0
-vim.g.loaded_node_provider            = 0
+local M = {}
 
-
-
--- Native LSP
-vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {
-  desc = "Go to definition",
-})
-
-vim.keymap.set('n', 'gy', vim.lsp.buf.type_definition, {
-  desc = "Go to type definition",
-})
-
-vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, {
-  desc = "Go to implementation",
-})
-
-vim.keymap.set('n', 'gr', vim.lsp.buf.references, {
-  desc = "List references",
-})
-
-vim.keymap.set('n', 'K', vim.lsp.buf.hover, {
-  desc = "Show hover documentation",
-})
-
-vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, {
-  desc = "Rename symbol",
-})
-
-vim.keymap.set({'n', 'v'}, '<leader>ac', vim.lsp.buf.code_action, {
-  desc = "LSP code action",
-})
-
-vim.keymap.set('n', '[g', function()
-  vim.diagnostic.jump({ count = -1, float = true })
-end, {
-  desc = "Previous diagnostic",
-})
-
-vim.keymap.set('n', ']g', function()
-  vim.diagnostic.jump({ count = 1, float = true })
-end, {
-  desc = "Next diagnostic",
-})
-
-vim.keymap.set('n', '<leader>qf', function()
-  vim.lsp.buf.code_action({
-    filter = function(action)
-      return action.isPreferred
-    end,
-    apply = true,
-  })
-end, {
-  desc = "Apply preferred quick fix",
-})
-
--- Catches typos and works inline while writing
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "markdown", "tex", "plaintex", "typst" },
-  callback = function()
-    vim.opt_local.spell = true
-  end,
-})
-
-local function switch_source_header()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local clients = vim.lsp.get_clients({
-    bufnr = bufnr,
-    name = "clangd",
-  })
-
-  local client = clients[1]
-
-  if not client then
-    vim.notify(
-      "clangd is not attached to this buffer",
-      vim.log.levels.WARN
-    )
-    return
-  end
-
-  local params = {
-    uri = vim.uri_from_bufnr(bufnr),
-  }
-
-  client:request(
-    "textDocument/switchSourceHeader",
-    params,
-    function(err, result)
-      if err then
-        vim.notify(
-          "clangd source/header switch failed: " .. err.message,
-          vim.log.levels.ERROR
-        )
-        return
-      end
-
-      if not result or result == "" then
-        vim.notify(
-          "No corresponding source/header file found",
-          vim.log.levels.INFO
-        )
-        return
-      end
-
-      vim.schedule(function()
-        vim.cmd.edit(vim.uri_to_fname(result))
-      end)
-    end,
-    bufnr
+local function setup_yank_highlight()
+  local group = vim.api.nvim_create_augroup(
+    "JazeYankHighlight",
+    { clear = true }
   )
+
+  vim.api.nvim_create_autocmd("TextYankPost", {
+    group = group,
+    callback = function()
+      vim.highlight.on_yank({
+        timeout = 150,
+      })
+    end,
+  })
 end
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "c", "cpp", "objc", "objcpp" },
-  callback = function(event)
-    vim.keymap.set('n', '<leader>sh', switch_source_header, {
-      buffer = event.buf,
-      silent = true,
-      desc = "Switch source/header",
-    })
-  end,
-})
+local function setup_parent_directory_creation()
+  local group = vim.api.nvim_create_augroup(
+    "JazeCreateParentDirectory",
+    { clear = true }
+  )
 
--- Shell helper for timing long-running commands: scripts/timer.sh
-vim.api.nvim_create_user_command("Time", function(opts)
-  local cmd = opts.args
-  local start = vim.loop.hrtime()
-  vim.fn.system(cmd)
-  local elapsed = (vim.loop.hrtime() - start) / 1e9
-  local code = vim.v.shell_error
-  local msg = string.format("Took %.3fs (exit %d)", elapsed, code)
-  print(msg)
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    group = group,
+    callback = function(event)
+      if event.match:match("^%w%w+:[\\/][\\/]") then
+        return
+      end
 
-  local log = vim.fs.normalize(vim.fn.expand("~/timings.log"))
-  local f = io.open(log, "a")
-  if f then
-    f:write(string.format(
-      "%s | %s | %.3fs | exit=%d\n",
-      os.date("%Y-%m-%d %H:%M:%S"),
-      cmd,
+      local parent = vim.fs.dirname(event.match)
+
+      if parent then
+        vim.fn.mkdir(parent, "p")
+      end
+    end,
+  })
+end
+
+local function setup_external_change_detection()
+  local group = vim.api.nvim_create_augroup(
+    "JazeCheckTime",
+    { clear = true }
+  )
+
+  vim.api.nvim_create_autocmd({
+    "FocusGained",
+    "BufEnter",
+    "CursorHold",
+    "TermLeave",
+  }, {
+    group = group,
+    callback = function()
+      if vim.fn.getcmdwintype() == "" then
+        vim.cmd.checktime()
+      end
+    end,
+  })
+end
+
+local function setup_terminal_buffers()
+  local group = vim.api.nvim_create_augroup(
+    "JazeTerminal",
+    { clear = true }
+  )
+
+  vim.api.nvim_create_autocmd("TermOpen", {
+    group = group,
+    callback = function()
+      vim.opt_local.number = false
+      vim.opt_local.relativenumber = false
+      vim.opt_local.signcolumn = "no"
+    end,
+  })
+
+  vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", {
+    desc = "Leave terminal mode",
+  })
+end
+
+local function setup_quick_close()
+  local group = vim.api.nvim_create_augroup(
+    "JazeQuickClose",
+    { clear = true }
+  )
+
+  vim.api.nvim_create_autocmd("FileType", {
+    group = group,
+    pattern = {
+      "checkhealth",
+      "help",
+      "lspinfo",
+      "man",
+      "notify",
+      "qf",
+    },
+    callback = function(event)
+      vim.keymap.set("n", "q", "<cmd>close<cr>", {
+        buffer = event.buf,
+        silent = true,
+        desc = "Close window",
+      })
+    end,
+  })
+end
+
+local function setup_time_command()
+  vim.api.nvim_create_user_command("Time", function(opts)
+    local command = opts.args
+    local start = vim.uv.hrtime()
+
+    local output = vim.fn.system(command)
+    local exit_code = vim.v.shell_error
+    local elapsed = (vim.uv.hrtime() - start) / 1e9
+
+    local message = string.format(
+      "Took %.3fs (exit %d)",
       elapsed,
-      code
-    ))
-    f:close()
-  end
-end, { nargs = "+", complete = "shellcmd" })
+      exit_code
+    )
+
+    vim.notify(
+      message,
+      exit_code == 0
+        and vim.log.levels.INFO
+        or vim.log.levels.ERROR
+    )
+
+    local log_path = vim.fn.expand("~/timings.log")
+    local file = io.open(log_path, "a")
+
+    if file then
+      file:write(string.format(
+        "%s | %s | %.3fs | exit=%d\n",
+        os.date("%Y-%m-%d %H:%M:%S"),
+        command,
+        elapsed,
+        exit_code
+      ))
+      file:close()
+    end
+
+    if exit_code ~= 0 and output ~= "" then
+      vim.notify(output, vim.log.levels.ERROR)
+    end
+  end, {
+    nargs = "+",
+    complete = "shellcmd",
+  })
+
+  vim.api.nvim_create_user_command("TimingLog", function()
+    local log_path = vim.fn.expand("~/timings.log")
+
+    vim.cmd(
+      "botright split " .. vim.fn.fnameescape(log_path)
+    )
+  end, {})
+end
+
+local function setup_which_command()
+  vim.api.nvim_create_user_command("Which", function(opts)
+    local executable = vim.fn.exepath(opts.args)
+
+    if executable == "" then
+      vim.notify(
+        opts.args .. " was not found in Neovim's PATH",
+        vim.log.levels.WARN
+      )
+      return
+    end
+
+    vim.notify(executable)
+  end, {
+    nargs = 1,
+    complete = "shellcmd",
+  })
+end
+
+function M.setup()
+  setup_yank_highlight()
+  setup_parent_directory_creation()
+  setup_external_change_detection()
+  setup_terminal_buffers()
+  setup_quick_close()
+  setup_time_command()
+  setup_which_command()
+end
+
+return M

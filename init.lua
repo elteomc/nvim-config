@@ -9,7 +9,7 @@ pcall(require, "jaze.local")
 
 require("jaze.settings")
 require("jaze.keymaps")
-require("jaze.workflow")
+require("jaze.workflow").setup()
 require("jaze.cursor").setup()
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
