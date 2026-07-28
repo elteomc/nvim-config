@@ -10,7 +10,7 @@ if ok_cmp then
       { name = 'luasnip' }, -- drop if you don't use snippets in Lean
       { name = 'path' },
       { name = 'buffer' },
-    }), -- intentionally no { name = 'emoji' }
+    }),
   })
 end
 
@@ -18,3 +18,4 @@ end
 pcall(function()
   require('luasnip').filetype_set('lean', {}) -- empty snippet set for Lean
 end)
+

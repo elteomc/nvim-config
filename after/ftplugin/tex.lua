@@ -10,7 +10,6 @@ vim.opt_local.shiftwidth = 2
 vim.opt_local.tabstop = 2
 vim.opt_local.expandtab = true
 
--- TeX-only keymaps (examples)
+-- TeX-only keymaps
 vim.keymap.set("n", "<leader>lt", "<cmd>VimtexTocOpen<cr>", { buffer = true, desc = "VimTeX TOC" })
 vim.keymap.set("n", "<leader>le", "<cmd>VimtexErrors<cr>", { buffer = true, desc = "VimTeX errors" })
-

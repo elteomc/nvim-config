@@ -26,7 +26,7 @@ return {
         paths = { vim.fn.stdpath("config") .. "/lua/snippets" },
       })
 
-      -- Useful keymaps (optional; cmp Tab already handles jump/expand)
+      -- Useful keymaps (optional since cmp Tab already handles jump/expand)
       vim.keymap.set({ "i", "s" }, "<C-l>", function()
         if ls.choice_active() then ls.change_choice(1) end
       end, { desc = "LuaSnip next choice" })

@@ -8,7 +8,7 @@
 return {
   {
     "stevearc/oil.nvim",
-    -- Eager-load so "-" / :Oil don't wait on first lazy.nvim fetch + require (~0.5–1s cold).
+    -- Eager-load so "-" / :Oil don't wait on first lazy.nvim fetch + require.
     lazy = false,
     priority = 70,
     cmd = { "Oil" },
@@ -24,7 +24,7 @@ return {
       },
     },
     keys = {
-      { "-", "<cmd>Oil<cr>", desc = "Oil: open parent directory" },
+      { "-",         "<cmd>Oil<cr>",         desc = "Oil: open parent directory" },
       { "<leader>o", "<cmd>Oil --float<cr>", desc = "Oil: floating window" },
     },
   },
@@ -34,7 +34,7 @@ return {
     cmd = { "FzfLua" },
     opts = {},
     keys = {
-      { "<leader>ff", "<cmd>FzfLua files<cr>", desc = "Find files" },
+      { "<leader>ff", "<cmd>FzfLua files<cr>",     desc = "Find files" },
       { "<leader>fG", "<cmd>FzfLua git_files<cr>", desc = "Git files" },
       -- { "<leader>fg", "<cmd>FzfLua live_grep<cr>", desc = "Grep" },
       {
@@ -42,8 +42,8 @@ return {
         function()
           require("fzf-lua").live_grep({
             cwd = vim.bo.filetype == "oil"
-              and require("oil").get_current_dir()
-              or vim.fn.getcwd(),
+                and require("oil").get_current_dir()
+                or vim.fn.getcwd(),
           })
         end,
         desc = "Grep",
@@ -72,21 +72,21 @@ return {
           local config = require("fzf-lua.config")
           require("fzf-lua").live_grep({
             rg_opts = config.defaults.grep.rg_opts
-              .. "--hidden --glob=!**/.git/*",
+                .. "--hidden --glob=!**/.git/*",
           })
         end,
         desc = "Grep (improved hidden)",
       },
-      { "<leader>fb", "<cmd>FzfLua buffers<cr>", desc = "Buffers" },
-      { "<leader>fr", "<cmd>FzfLua oldfiles<cr>", desc = "Recent files" },
-      { "<leader>ft", "<cmd>FzfLua help_tags<cr>", desc = "Help tags" },
-      { "<leader>fd", "<cmd>FzfLua diagnostics_document<cr>", desc = "Diagnostics (buffer)" },
+      { "<leader>fb", "<cmd>FzfLua buffers<cr>",               desc = "Buffers" },
+      { "<leader>fr", "<cmd>FzfLua oldfiles<cr>",              desc = "Recent files" },
+      { "<leader>ft", "<cmd>FzfLua help_tags<cr>",             desc = "Help tags" },
+      { "<leader>fd", "<cmd>FzfLua diagnostics_document<cr>",  desc = "Diagnostics (buffer)" },
       { "<leader>fD", "<cmd>FzfLua diagnostics_workspace<cr>", desc = "Diagnostics (workspace)" },
       -- Check with Telescope keymaps
-      { "<leader>gs", "<cmd>FzfLua git_status<cr>", desc = "Git status" },
-      { "<leader>gc", "<cmd>FzfLua git_commits<cr>", desc = "Git commits" },
-      { "<leader>gC", "<cmd>FzfLua git_bcommits<cr>", desc = "Git commits (buffer)" },
-      { "<leader>gb", "<cmd>FzfLua git_branches<cr>", desc = "Git branches" },
+      { "<leader>gs", "<cmd>FzfLua git_status<cr>",            desc = "Git status" },
+      { "<leader>gc", "<cmd>FzfLua git_commits<cr>",           desc = "Git commits" },
+      { "<leader>gC", "<cmd>FzfLua git_bcommits<cr>",          desc = "Git commits (buffer)" },
+      { "<leader>gb", "<cmd>FzfLua git_branches<cr>",          desc = "Git branches" },
       -- { "<leader>gt", "<cmd>FzfLua git_stash<cr>", desc = "Git stash" },
     },
   },
