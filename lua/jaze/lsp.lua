@@ -261,12 +261,30 @@ local function configure_servers()
     capabilities = capabilities,
   })
 
+  vim.lsp.config("tinymist", {
+    cmd = { "tinymist" },
+    filetypes = { "typst" },
+    root_markers = {
+      "typst.toml",
+      ".git",
+    },
+    single_file_support = true,
+    capabilities = capabilities,
+    settings = {
+      exportPdf = "onType",
+      outputPath = "$root/target/$dir/$name",
+      formatterMode = "typstyle",
+      compilerPath = vim.fn.exepath("typst"),
+    },
+  })
+
   vim.lsp.enable({
     "lua_ls",
     "texlab",
     "clangd",
     "julials",
     "marksman",
+    "tinymist",
   })
 end
 
