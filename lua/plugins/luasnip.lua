@@ -19,7 +19,9 @@ return {
       })
 
       -- Load community snippets (optional)
-      require("luasnip.loaders.from_vscode").lazy_load()
+      require("luasnip.loaders.from_vscode").lazy_load({
+        exclude = { "lean" },
+      })
 
       -- Load your own snippets from lua/snippets/
       require("luasnip.loaders.from_lua").lazy_load({
