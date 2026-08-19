@@ -54,12 +54,12 @@ o.autoread, o.history, o.errorbells, o.belloff, o.swapfile = true, 1000, false, 
 vim.opt.cino:append("L0")
 vim.opt.iskeyword:append(":")
 
--- cd to current file’s folder on startup
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    pcall(vim.cmd, "silent! lcd %:p:h")
-  end,
-})
+-- cd to current file’s folder on startup... NOT A GOOD IDEA LOL
+-- vim.api.nvim_create_autocmd("VimEnter", {
+--   callback = function()
+--     pcall(vim.cmd, "silent! lcd %:p:h")
+--   end,
+-- })
 
 -- Less noisy diagnostics + a perf toggle
 vim.diagnostic.config({ update_in_insert = false, virtual_text = { spacing = 2, prefix = "●" } })
@@ -111,12 +111,12 @@ vim.api.nvim_create_user_command("Switch", function()
 
   local function wanted(name)
     return name:match("^tokyonight")
-      or name:match("^oxocarbon")
-      or name:match("^solarized")
-      or name:match("^kanagawa")
-      or name:match("^catppuccin")
-      or name == "cyberdream"
-      or name == "gruvbox"
+        or name:match("^oxocarbon")
+        or name:match("^solarized")
+        or name:match("^kanagawa")
+        or name:match("^catppuccin")
+        or name == "cyberdream"
+        or name == "gruvbox"
   end
 
   local seen = {}
@@ -165,10 +165,11 @@ vim.api.nvim_create_user_command("Z", function(opts)
     return
   end
 
-  vim.cmd.cd(vim.fn.fnameescape(dir))
-  vim.cmd("Oil")
+  vim.cmd.cd(vim.fn.fnameescape(dir))        -- Make zoxide's query result the global cwd
+  vim.cmd("Oil " .. vim.fn.fnameescape(dir)) -- Forcing Oil to open that exact dir
 end, {
-nargs = "+",
+  nargs = "+",
+  desc = "Jump to zoxide directory and open Oil",
 })
 
 -- Tabbing (only works whenever there are no tab characters outside of indentation)
