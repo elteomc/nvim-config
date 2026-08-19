@@ -1,7 +1,7 @@
 local transparent_groups = {
   "Normal",
   "NormalNC",
-  "NormalFloat",
+  -- "NormalFloat",
   "SignColumn",
   "EndOfBuffer",
 }
@@ -9,7 +9,7 @@ local transparent_groups = {
 local function apply_transparency()
   for _, group in ipairs(transparent_groups) do
     vim.api.nvim_set_hl(0, group, {
-      bg = "NONE",
+      bg = "none",
     })
   end
 end
@@ -25,7 +25,7 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 })
 
 return {
-  -- :Switch ensures plugins via lua/jaze/settings.lua
+  -- :switch ensures plugins via lua/jaze/settings.lua
   {
     "folke/tokyonight.nvim",
     lazy = true,
@@ -67,7 +67,10 @@ return {
     priority = 1000,
     opts = {
       transparent = true,
+      terminal_colors = true,
       styles = {
+        sidebars = "transparent",
+        floats = "dark",
         comments = { italic = true },
         keywords = { italic = true },
       },
@@ -90,7 +93,13 @@ return {
   {
     "nyoom-engineering/oxocarbon.nvim",
     lazy = true,
+    build = false,
     -- priority = 98,
+    config = function()
+      vim.opt.background = "dark"
+      vim.cmd.colorscheme("oxocarbon")
+      apply_transparency()
+    end,
   },
   {
     "nvim-lualine/lualine.nvim",
@@ -104,17 +113,17 @@ return {
     version = "*",
     opts = {
       direction = "float",
-      open_mapping = [[<C-\>]],
+      open_mapping = [[<c-\>]],
       shade_terminals = false,
     },
     keys = {
-      { "<leader>to", "<cmd>ToggleTerm<cr>", desc = "Terminal toggle" },
+      { "<leader>to", "<cmd>toggleterm<cr>", desc = "terminal toggle" },
       {
         "<leader>ca",
         function()
           require("jaze.cursor").toggle_agent()
         end,
-        desc = "Cursor Agent",
+        desc = "cursor agent",
       },
     },
   },

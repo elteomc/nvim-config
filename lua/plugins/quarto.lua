@@ -58,6 +58,8 @@ return {
         sync_scroll_type = "middle",
         math = { enable = true },
       }
+
+      vim.keymap.set('n', '<Leader>mp', '<cmd>MarkdownPreviewToggle<CR>', { desc = "Toggle md preview" })
     end,
   },
 }

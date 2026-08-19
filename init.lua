@@ -31,4 +31,13 @@ require("lazy").setup("plugins", {
   ui = {
     border = "rounded",
   },
+  pkg = {
+    sources = {
+      "lazy",
+      "packspec",
+    },
+  },
+  rocks = {
+    enabled = false,
+  },
 })

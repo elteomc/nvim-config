@@ -31,7 +31,7 @@ map('n', '\\', function()
 end, { silent = true, desc = 'Copy full file path' })
 
 map('n', '<Leader>b', '^')
-map('n', '<Leader>e', ':e .<CR>', { silent = true })
+-- map('n', '<Leader>e', ':e .<CR>', { silent = true })
 
 -- map('n', '<Leader>r', '<C-r>')
 map('n', '<Leader>j', '<C-W><C-J>')
@@ -87,7 +87,7 @@ map('n', '<Leader>l', ':Lazy<Return>', { silent = true })
 
 vim.keymap.set('n', '<F2>', ':Switch<CR>', { silent = true })
 
-vim.keymap.set({'n', 'v'}, '<leader>f', function()
+vim.keymap.set({ 'n', 'v' }, '<leader>f', function()
   vim.lsp.buf.format({ async = true })
 end, {
   desc = "Format buffer or selection",
@@ -98,16 +98,16 @@ end, {
 vim.api.nvim_create_autocmd("User", {
   pattern = "VeryLazy",
   once = true,
-  
+
   callback = function()
     local Terminal = require("toggleterm.terminal").Terminal
-    
+
     local julia = Terminal:new({
       cmd = vim.fn.exepath("julia"),
       direction = "vertical",
       size = 300,
     })
-    
+
     -- Julia REPL via toggleterm
     vim.keymap.set("n", "<leader>jr", function()
       julia:toggle()
@@ -212,11 +212,11 @@ vim.keymap.set("n", "<leader>xc", function()
     return
   end
 
-  local file        = vim.fn.expand("%:p")
-  local dir         = vim.fn.expand("%:p:h")
-  local stem        = vim.fn.expand("%:t:r")
-  local target_dir  = dir .. "/target"
-  local pdf         = target_dir .. "/" .. stem .. ".pdf"
+  local file       = vim.fn.expand("%:p")
+  local dir        = vim.fn.expand("%:p:h")
+  local stem       = vim.fn.expand("%:t:r")
+  local target_dir = dir .. "/target"
+  local pdf        = target_dir .. "/" .. stem .. ".pdf"
 
   vim.fn.mkdir(target_dir, "p")
 
